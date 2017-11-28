@@ -1,0 +1,45 @@
+---
+title: "first-step"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages}
+library(tidyverse)
+library(infer)
+```
+
+```{r read-data}
+ncaa <- read_csv("NCAA Mens March Madness Historical Results.csv")
+```
+
+```{r creating_new_dataset}
+ncaa_1 <- ncaa %>% mutate(diff_seed = `Winning Seed` - `Losing Seed`)
+ncaa_1 <- ncaa_1 %>% mutate(res = case_when(diff_seed < 0 ~1, diff_seed > 0 ~0))
+ncaa_1 <- ncaa_1 %>% mutate(diff_seed_abs = case_when(diff_seed < 0 ~-diff_seed, 
+                                                      diff_seed > 0 ~diff_seed))
+```
+
+```{r create_plot}
+ncaa_2 <- ncaa_1 %>%
+  group_by(diff_seed_abs) %>%
+  summarise(prop_win = sum(res)/n())
+
+ncaa_2 <- ncaa_2 %>%
+  filter(!is.na(prop_win))
+
+ggplot(ncaa_2) +
+  geom_point(mapping = aes(x = diff_seed_abs, y = prop_win)) +
+  geom_smooth(mapping = aes(x = diff_seed_abs, y = prop_win), method = "lm", se = FALSE) +
+  labs(title = "Linear relationship between winning proportion and difference in seeds", x = "Difference in seeds(the larger seed minus the smaller seed)", y = "Porportion of wins")
+  
+```
+
+```{r create_new_dataset_2}
+
+```
+
+
